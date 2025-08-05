@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    container_name: mysqlApiEcf
+
+    networks:
+      - reseau3
+    volumes:
+      - data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=logs
+      - MYSQL_ROOT_PASSWORD=root
+  apiecf:
+    build:
+      dockerfile: Dockerfile
+    networks:
+      - reseau3
+    depends_on:
+      mysql:
+        condition: service_healthy
+    container_name: apiEcf
+    ports:
+      - 8091:8091
+
+networks:
+  reseau3: {}
+
+volumes:
+  data: {}
+
+
